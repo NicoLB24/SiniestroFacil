@@ -1,0 +1,1285 @@
+{
+  "info": {
+    "name": "SiniestroFacil - Microservicios",
+    "description": "Pruebas de los 4 microservicios de SiniestroFacil. Ejecutar las carpetas en orden: las variables (ids, folio, token) se guardan automaticamente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "authUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "polizasUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "denunciasUrl",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "talleresUrl",
+      "value": "http://localhost:8084"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    },
+    {
+      "key": "polizaId",
+      "value": ""
+    },
+    {
+      "key": "tallerId",
+      "value": ""
+    },
+    {
+      "key": "denunciaId",
+      "value": ""
+    },
+    {
+      "key": "folio",
+      "value": ""
+    },
+    {
+      "key": "fotoId",
+      "value": ""
+    },
+    {
+      "key": "asignacionId",
+      "value": ""
+    },
+    {
+      "key": "denunciaRechazadaId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. ms-auth-usuarios",
+      "item": [
+        {
+          "name": "Login asegurado (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{authUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan.perez@mail.cl\",\n  \"password\": \"Clave123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"token\", pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validar token (200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{authUrl}}/api/v1/auth/validar"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login contrasena incorrecta (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{authUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan.perez@mail.cl\",\n  \"password\": \"incorrecta\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validar token adulterado (401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer token.falso.123"
+              }
+            ],
+            "url": "{{authUrl}}/api/v1/auth/validar"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar asegurado (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{authUrl}}/api/v1/auth/registro",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Camila Rojas Fuentes\",\n  \"email\": \"camila.rojas@mail.cl\",\n  \"password\": \"Clave123\",\n  \"rut\": \"19876543-2\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"usuarioId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar email repetido (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{authUrl}}/api/v1/auth/registro",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Camila Rojas Fuentes\",\n  \"email\": \"camila.rojas@mail.cl\",\n  \"password\": \"Clave123\",\n  \"rut\": \"19876543-2\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar con datos invalidos (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{authUrl}}/api/v1/auth/registro",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"email\": \"no-es-un-email\",\n  \"password\": \"123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{authUrl}}/api/v1/usuarios"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios rol TALLER (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{authUrl}}/api/v1/usuarios?rol=TALLER"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener usuario (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{authUrl}}/api/v1/usuarios/{{usuarioId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar usuario (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{authUrl}}/api/v1/usuarios/{{usuarioId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Camila Rojas F.\",\n  \"rut\": \"19876543-2\",\n  \"rol\": \"ASEGURADO\",\n  \"activo\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar roles (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{authUrl}}/api/v1/roles"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar usuario (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{authUrl}}/api/v1/usuarios/{{usuarioId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener usuario eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{authUrl}}/api/v1/usuarios/{{usuarioId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. ms-polizas",
+      "item": [
+        {
+          "name": "Listar polizas (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{polizasUrl}}/api/v1/polizas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Polizas por RUT (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{polizasUrl}}/api/v1/polizas?rut=12345678-9"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vigencia POL-1001 vigente (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{polizasUrl}}/api/v1/polizas/numero/POL-1001/vigencia"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Vigente\", () => pm.expect(pm.response.json().vigente).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vigencia POL-1003 vencida (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{polizasUrl}}/api/v1/polizas/numero/POL-1003/vigencia"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"No vigente\", () => pm.expect(pm.response.json().vigente).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear poliza (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{polizasUrl}}/api/v1/polizas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroPoliza\": \"POL-2001\",\n  \"rutAsegurado\": \"19876543-2\",\n  \"nombreAsegurado\": \"Camila Rojas Fuentes\",\n  \"patente\": \"PQRS34\",\n  \"fechaInicio\": \"2025-06-01\",\n  \"fechaFin\": \"2027-05-31\",\n  \"coberturas\": [\n    {\n      \"nombre\": \"Danos propios\",\n      \"montoMaximo\": 12000000\n    },\n    {\n      \"nombre\": \"Robo total\",\n      \"montoMaximo\": 10000000\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"polizaId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear poliza duplicada (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{polizasUrl}}/api/v1/polizas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroPoliza\": \"POL-2001\",\n  \"rutAsegurado\": \"19876543-2\",\n  \"nombreAsegurado\": \"Camila Rojas Fuentes\",\n  \"patente\": \"PQRS34\",\n  \"fechaInicio\": \"2025-06-01\",\n  \"fechaFin\": \"2027-05-31\",\n  \"coberturas\": [\n    {\n      \"nombre\": \"Danos propios\",\n      \"montoMaximo\": 12000000\n    },\n    {\n      \"nombre\": \"Robo total\",\n      \"montoMaximo\": 10000000\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear poliza invalida (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{polizasUrl}}/api/v1/polizas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroPoliza\": \"\",\n  \"rutAsegurado\": \"123\",\n  \"patente\": \"\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener poliza (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{polizasUrl}}/api/v1/polizas/{{polizaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar poliza (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{polizasUrl}}/api/v1/polizas/{{polizaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroPoliza\": \"POL-2001\",\n  \"rutAsegurado\": \"19876543-2\",\n  \"nombreAsegurado\": \"Camila Rojas Fuentes\",\n  \"patente\": \"PQRS34\",\n  \"fechaInicio\": \"2025-06-01\",\n  \"fechaFin\": \"2028-05-31\",\n  \"coberturas\": [\n    {\n      \"nombre\": \"Danos propios\",\n      \"montoMaximo\": 12000000\n    },\n    {\n      \"nombre\": \"Robo total\",\n      \"montoMaximo\": 10000000\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar poliza (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{polizasUrl}}/api/v1/polizas/{{polizaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Poliza inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{polizasUrl}}/api/v1/polizas/9999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. ms-talleres",
+      "item": [
+        {
+          "name": "Listar talleres (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{talleresUrl}}/api/v1/talleres"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Talleres disponibles (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{talleresUrl}}/api/v1/talleres?disponibles=true"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear taller (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{talleresUrl}}/api/v1/talleres",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Taller Providencia\",\n  \"direccion\": \"Av. Providencia 2200\",\n  \"comuna\": \"Providencia\",\n  \"telefono\": \"+56224445566\",\n  \"email\": \"contacto@tallerprovidencia.cl\",\n  \"capacidadMaxima\": 3\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"tallerId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear taller invalido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{talleresUrl}}/api/v1/talleres",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"capacidadMaxima\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener taller (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{talleresUrl}}/api/v1/talleres/{{tallerId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar taller (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{talleresUrl}}/api/v1/talleres/{{tallerId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Taller Providencia\",\n  \"direccion\": \"Av. Providencia 2200\",\n  \"comuna\": \"Providencia\",\n  \"telefono\": \"+56224445566\",\n  \"email\": \"contacto@tallerprovidencia.cl\",\n  \"capacidadMaxima\": 6\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar taller (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{talleresUrl}}/api/v1/talleres/{{tallerId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Taller inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{talleresUrl}}/api/v1/talleres/9999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Id con formato invalido (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{talleresUrl}}/api/v1/talleres/abc"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. ms-denuncias + flujo completo",
+      "item": [
+        {
+          "name": "Registrar denuncia: devuelve FOLIO (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{denunciasUrl}}/api/v1/denuncias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rutAsegurado\": \"12345678-9\",\n  \"numeroPoliza\": \"POL-1001\",\n  \"patente\": \"ABCD12\",\n  \"fechaSiniestro\": \"2025-10-20T18:30:00\",\n  \"lugar\": \"Av. Libertador Bernardo O'Higgins con Ejercito\",\n  \"comuna\": \"Santiago\",\n  \"descripcion\": \"Colision por alcance en semaforo, dano en parachoques trasero y luz derecha\",\n  \"fotos\": [\n    {\n      \"url\": \"https://fotos.siniestrofacil.cl/demo/parachoques.jpg\",\n      \"descripcion\": \"Parachoques\"\n    },\n    {\n      \"url\": \"https://fotos.siniestrofacil.cl/demo/luz.jpg\",\n      \"descripcion\": \"Luz trasera\"\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"denunciaId\", pm.response.json().id);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"folio\", pm.response.json().folio);",
+                  "pm.test(\"Estado RECIBIDA\", () => pm.expect(pm.response.json().estado).to.eql(\"RECIBIDA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar denuncia invalida (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{denunciasUrl}}/api/v1/denuncias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rutAsegurado\": \"123\",\n  \"numeroPoliza\": \"POL-1001\",\n  \"patente\": \"ABCD12\",\n  \"fechaSiniestro\": \"2099-01-01T10:00:00\",\n  \"lugar\": \"Av. Libertador Bernardo O'Higgins con Ejercito\",\n  \"comuna\": \"Santiago\",\n  \"descripcion\": \"corta\",\n  \"fotos\": [\n    {\n      \"url\": \"https://fotos.siniestrofacil.cl/demo/parachoques.jpg\",\n      \"descripcion\": \"Parachoques\"\n    },\n    {\n      \"url\": \"https://fotos.siniestrofacil.cl/demo/luz.jpg\",\n      \"descripcion\": \"Luz trasera\"\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar por folio (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/denuncias/folio/{{folio}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mis denuncias por RUT (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/denuncias?rut=12345678-9"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Corregir denuncia (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{denunciasUrl}}/api/v1/denuncias/{{denunciaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rutAsegurado\": \"12345678-9\",\n  \"numeroPoliza\": \"POL-1001\",\n  \"patente\": \"ABCD12\",\n  \"fechaSiniestro\": \"2025-10-20T18:30:00\",\n  \"lugar\": \"Alameda con Ejercito, frente al metro\",\n  \"comuna\": \"Santiago\",\n  \"descripcion\": \"Colision por alcance en semaforo, dano en parachoques trasero y luz derecha\",\n  \"fotos\": [\n    {\n      \"url\": \"https://fotos.siniestrofacil.cl/demo/parachoques.jpg\",\n      \"descripcion\": \"Parachoques\"\n    },\n    {\n      \"url\": \"https://fotos.siniestrofacil.cl/demo/luz.jpg\",\n      \"descripcion\": \"Luz trasera\"\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Agregar foto (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{denunciasUrl}}/api/v1/denuncias/{{denunciaId}}/fotos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://fotos.siniestrofacil.cl/demo/patente.jpg\",\n  \"descripcion\": \"Patente\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"fotoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar foto (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/denuncias/{{denunciaId}}/fotos/{{fotoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PROCESAR: valida poliza y asigna taller (200)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/procesador/denuncias/{{denunciaId}}",
+            "description": "Simula la Lambda que consume la cola SQS. Requiere ms-polizas y ms-talleres levantados."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"asignacionId\", pm.response.json().asignacionId);",
+                  "pm.test(\"Taller asignado\", () => pm.expect(pm.response.json().estado).to.eql(\"TALLER_ASIGNADO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Procesar de nuevo (409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/procesador/denuncias/{{denunciaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Taller ve sus casos asignados (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{talleresUrl}}/api/v1/talleres/1/denuncias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Taller confirma recepcion (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{talleresUrl}}/api/v1/asignaciones/{{asignacionId}}/recepcion",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observacion\": \"Vehiculo recibido con dano en parachoques trasero\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar recepcion dos veces (409)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{talleresUrl}}/api/v1/asignaciones/{{asignacionId}}/recepcion",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observacion\": \"otra vez\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar estado denuncia: VEHICULO_RECIBIDO (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{denunciasUrl}}/api/v1/denuncias/{{denunciaId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"VEHICULO_RECIBIDO\",\n  \"detalle\": \"El taller confirmo la recepcion del vehiculo\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar denuncia ya tomada por taller (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/denuncias/{{denunciaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar denuncia con poliza vencida (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{denunciasUrl}}/api/v1/denuncias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rutAsegurado\": \"22222222-2\",\n  \"numeroPoliza\": \"POL-1003\",\n  \"patente\": \"KLMN45\",\n  \"fechaSiniestro\": \"2025-10-20T18:30:00\",\n  \"lugar\": \"Av. Libertador Bernardo O'Higgins con Ejercito\",\n  \"comuna\": \"Santiago\",\n  \"descripcion\": \"Colision por alcance en semaforo, dano en parachoques trasero y luz derecha\",\n  \"fotos\": []\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"denunciaRechazadaId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PROCESAR poliza vencida: RECHAZADA (200)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/procesador/denuncias/{{denunciaRechazadaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Rechazada\", () => pm.expect(pm.response.json().estado).to.eql(\"RECHAZADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar denuncia rechazada (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/denuncias/{{denunciaRechazadaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Denuncia inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{denunciasUrl}}/api/v1/denuncias/9999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
