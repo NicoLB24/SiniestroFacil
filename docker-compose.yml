@@ -1,0 +1,23 @@
+# Base de datos MySQL para ejecutar los microservicios en local.
+# Crea las cuatro bases (una por microservicio); las tablas las crea Flyway al levantar cada servicio.
+#   docker compose up -d
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: siniestrofacil-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      TZ: America/Santiago
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql-data:
